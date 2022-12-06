@@ -1,0 +1,6 @@
+A simple REST Application, where we can add user and vehicles.
+
+A User has one to many relationship.
+
+Hence a single User can have many vehicles.
+
