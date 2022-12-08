@@ -1,14 +1,8 @@
-const { User, Vehicle } = require('../models')
+const { Op, Sequelize } = require('sequelize');
+const { User, Vehicle, sequelize } = require('../models');
+const { handleError } = require('../utils/helper');
 
 User.hasMany(Vehicle);
-
-const handleError = (err, res) => {
-    console.error(err);
-
-    res.status(500).json({
-        message: err.message
-    })
-}
 
 const controller = {};
 
@@ -32,7 +26,7 @@ controller.update = async (req, res) => {
         const data = req.body;
         const { id } = req.params;
 
-        await User.update(data, { where: { id } });
+        await User.update(data, { where: { _id: id } });
 
         return res.status(200).json({
             message: 'User Updated!',
@@ -42,12 +36,41 @@ controller.update = async (req, res) => {
     }
 };
 
+controller.getUser = async (req, res) => {
+    try {
+        const user = await User.findByPk(req.params.id)
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'User Not Found!'
+            })
+        }
+        
+        return res.status(200).json({
+            message: 'User Details!',
+            user,
+        })
+    } catch (err) {
+        handleError(err, res);
+    }
+};
+
 controller.getAll = async (req, res) => {
     try {
-        const users = await User.findAll();
+        // const users = await User.findAll({
+        //     attributes: ['age', [Sequelize.fn('COUNT', Sequelize.col('_id')), 'count']],
+        //     group: "age",
+        //     order: [['age', 'DESC']]
+        // });
+
+        const { count, rows } = await User.findAndCountAll({
+            offset: 1,
+            limit: 5,
+        })
 
         return res.status(200).json({
-            users
+            count,
+            users: rows,
         })
     } catch (err) {
         handleError(err, res);
@@ -59,7 +82,7 @@ controller.delete = async (req, res) => {
         const { id } = req.params;
 
         const result = await User.destroy({
-            where: { id }
+            where: { _id: id }
         });
 
         if (!result) {

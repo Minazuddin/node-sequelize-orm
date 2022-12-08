@@ -1,12 +1,5 @@
 const { User, Vehicle } = require('../models');
-
-const handleError = (err, res) => {
-    console.error(err);
-
-    res.status(500).json({
-        message: err.message
-    })
-};
+const { handleError } = require('../utils/helper');
 
 const controller = {};
 
@@ -16,7 +9,7 @@ controller.create = async (req, res) => {
 
         const { userId } = req.params;
 
-        const user = await User.findOne({ id: userId });
+        const user = await User.findOne({ _id: userId });
 
         const vehicle = await user.createVehicle(vehicleData);
 
@@ -33,7 +26,7 @@ controller.update = async (req, res) => {
 
         const data = req.body;
 
-        await Vehicle.update(data, { where: { id } });
+        await Vehicle.update(data, { where: { _id: id } });
 
         return res.status(200).json({ message: 'Vehicle Updated!' })
 
@@ -46,11 +39,11 @@ controller.getAllVehiclesByUser = async (req, res) => {
     try {
         const { userId } = req.params;
 
-        const user = await User.findOne({ where: { id: userId } })
+        const user = await User.findOne({ where: { _id: userId } })
 
         if (!user) return res.status(404).json({ message: 'User Not Found!' })
 
-        const vehicles = await Vehicle.findAll({ where: { userId } })
+        const vehicles = await user.getVehicles();
 
         return res.status(200).json({ message: 'User Vehicles', vehicles })
 
@@ -63,7 +56,7 @@ controller.delete = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const result = await Vehicle.destroy({ where: { id } })
+        const result = await Vehicle.destroy({ where: { _id: id } })
         
         if (!result) {
             return res.status(404).json({

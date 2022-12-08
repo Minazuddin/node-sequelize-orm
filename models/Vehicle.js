@@ -1,9 +1,9 @@
 
 module.exports = (sequelize, DataTypes) => {
     const Vehicle = sequelize.define('Vehicle', {
-        id: {
-            type: DataTypes.INTEGER,
-            autoIncrement: true,
+        _id: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
         },
         brand: {
@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
             validate: {
                 notEmpty: true
             }
-        }
+        },
     });
     return Vehicle;
 };
