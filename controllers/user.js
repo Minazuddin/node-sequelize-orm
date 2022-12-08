@@ -1,8 +1,7 @@
-const { Op, Sequelize } = require('sequelize');
-const { User, Vehicle, sequelize } = require('../models');
-const { handleError } = require('../utils/helper');
+const { Users, Vehicles } = require('../models');
+const { handleError, sanitize, sendResponse, checkDuplicateEmail } = require('../utils/helper');
 
-User.hasMany(Vehicle);
+Users.hasMany(Vehicles);
 
 const controller = {};
 
@@ -10,12 +9,13 @@ controller.create = async (req, res) => {
     try {
         const data = req.body;
 
-        const user = await User.create(data);
+        // 1. Sanitize inputs
+        const err = await sanitize.createPayload(data);
+        if (err) return res.status(err.code).json({ status: false, message: err.message });
 
-        return res.status(201).json({
-            message: 'User Created!',
-            user
-        });
+        // 2. Create user
+        const user = await Users.create(data);
+        return sendResponse(res, 201, 'User Created!', user);
     } catch (err) {
         handleError(err, res);
     }
@@ -24,54 +24,29 @@ controller.create = async (req, res) => {
 controller.update = async (req, res) => {
     try {
         const data = req.body;
+        
         const { id } = req.params;
 
-        await User.update(data, { where: { _id: id } });
+        if (data.email) {
+            const err = await checkDuplicateEmail(data.email, id);
+            if (err) return sendResponse(res, 409, 'Email Already Exist!')  
+        };
 
-        return res.status(200).json({
-            message: 'User Updated!',
-        })
-    } catch (err) {
-        handleError(err, res);
-    }
-};
-
-controller.getUser = async (req, res) => {
-    try {
-        const user = await User.findByPk(req.params.id)
-
-        if (!user) {
-            return res.status(404).json({
-                message: 'User Not Found!'
-            })
-        }
+        await Users.update(data, { where: { _id: id } });
         
-        return res.status(200).json({
-            message: 'User Details!',
-            user,
-        })
+        return sendResponse(res, 200, 'User Updated!');
+    
     } catch (err) {
         handleError(err, res);
     }
 };
 
-controller.getAll = async (req, res) => {
+controller.getAllUsers = async (req, res) => {
     try {
-        // const users = await User.findAll({
-        //     attributes: ['age', [Sequelize.fn('COUNT', Sequelize.col('_id')), 'count']],
-        //     group: "age",
-        //     order: [['age', 'DESC']]
-        // });
+        const users = await Users.findAll();
 
-        const { count, rows } = await User.findAndCountAll({
-            offset: 1,
-            limit: 5,
-        })
-
-        return res.status(200).json({
-            count,
-            users: rows,
-        })
+        return  sendResponse(res, 200, 'User List!', users);
+    
     } catch (err) {
         handleError(err, res);
     }
@@ -81,19 +56,14 @@ controller.delete = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const result = await User.destroy({
+        const result = await Users.destroy({
             where: { _id: id }
         });
 
-        if (!result) {
-            return res.status(404).json({
-                message: 'User Not Found!',
-            })
-        }
+        if (!result) return sendResponse(res, 404, 'Users Not Found!');
 
-        return res.status(200).json({
-            message: 'User Deleted!',
-        })
+        return sendResponse(res, 200, 'User Deleted!')
+
     } catch (err) {
         handleError(err, res);
     }

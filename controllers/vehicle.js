@@ -1,5 +1,5 @@
-const { User, Vehicle } = require('../models');
-const { handleError } = require('../utils/helper');
+const { Users, Vehicles } = require('../models');
+const { handleError, sendResponse, sanitize } = require('../utils/helper');
 
 const controller = {};
 
@@ -9,11 +9,15 @@ controller.create = async (req, res) => {
 
         const { userId } = req.params;
 
-        const user = await User.findOne({ _id: userId });
+        const err = sanitize.createVehiclePayload(vehicleData);
+
+        if (err) return sendResponse(res, err.code, err.message);
+
+        const user = await Users.findOne({ _id: userId });
 
         const vehicle = await user.createVehicle(vehicleData);
 
-        return res.status(201).json({ message: 'Vehicle Added!', vehicle })
+        return sendResponse(res, 201, 'Vehicle Added!', vehicle);
 
     } catch (err) {
         handleError(err, res);
@@ -26,9 +30,9 @@ controller.update = async (req, res) => {
 
         const data = req.body;
 
-        await Vehicle.update(data, { where: { _id: id } });
+        await Vehicles.update(data, { where: { _id: id } });
 
-        return res.status(200).json({ message: 'Vehicle Updated!' })
+        return sendResponse(res, 200, 'Vehicle Updated!');
 
     } catch (err) {
         handleError(err, res);
@@ -39,13 +43,13 @@ controller.getAllVehiclesByUser = async (req, res) => {
     try {
         const { userId } = req.params;
 
-        const user = await User.findOne({ where: { _id: userId } })
+        const user = await Users.findOne({ where: { _id: userId } })
 
         if (!user) return res.status(404).json({ message: 'User Not Found!' })
 
-        const vehicles = await user.getVehicles();
+        const vehicles = await Vehicles.findAll({ where: { userId } })
 
-        return res.status(200).json({ message: 'User Vehicles', vehicles })
+        return sendResponse(res, 200, 'User Vehicles!', vehicles);
 
     } catch (err) {
         handleError(err, res);
@@ -56,17 +60,12 @@ controller.delete = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const result = await Vehicle.destroy({ where: { _id: id } })
+        const result = await Vehicles.destroy({ where: { _id: id } })
         
-        if (!result) {
-            return res.status(404).json({
-                message: 'Vehicle Not Found!',
-            })
-        }
+        if (!result) return sendResponse(res, 404, 'Vehicle Not Found!');
 
-        return res.status(200).json({
-            message: 'Vehicle Deleted!',
-        })
+        return sendResponse(res, 200, 'Vehicle Deleted!');
+    
     } catch (err) {
         handleError(err, res);
     }

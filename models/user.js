@@ -1,28 +1,30 @@
 module.exports = (sequelize, DataTypes) => {
-    const User = sequelize.define('User', {
+    const User = sequelize.define('Users', {
         _id: {
             type: DataTypes.UUID,
             defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
         },
-        firstName: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            validate: {
-                notEmpty: true
-            },
-        },
-        lastName: {
+        first_name: {
             type: DataTypes.STRING,
             allowNull: false,
             validate: {
                 notEmpty: true
             }
         },
-        fullName: {
-            type: DataTypes.VIRTUAL,
-            get() {
-                return `${this.firstName} ${this.lastName}`;
+        last_name: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: true
+            }
+        },
+        email: {
+            type: DataTypes.STRING,
+            unique: true,
+            allowNull: false,
+            validate: {
+                notEmpty: true
             }
         },
         age: {
@@ -30,19 +32,6 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             validate: {
                 notEmpty: true
-            },
-            get() {
-                return `I am ${this.getDataValue('age')} years old.`
-            }
-        },
-        dob: {
-            type: DataTypes.DATE,
-            defaultValue: DataTypes.NOW,
-        },
-        phone: {
-            type: DataTypes.STRING,
-            set(value) {
-                this.setDataValue('phone', `+91${value}`)
             }
         }
     });
