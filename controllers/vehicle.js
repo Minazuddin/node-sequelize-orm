@@ -14,7 +14,7 @@ controller.create = async (req, res) => {
 
         if (err) return sendResponse(res, err.code, err.message);
 
-        const user = await Users.findOne({ _id: userId });
+        const user = await Users.findOne({ where: { _id: userId } });
 
         const vehicle = await user.createVehicle(vehicleData);
 

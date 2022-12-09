@@ -1,5 +1,6 @@
 const { Users } = require('../models');
 const { checkDuplicateEmail, comparePassword } = require("../utils/helper");
+const regex = require('../utils/regex');
 
 exports.create = async (data) => {
     try {
@@ -42,6 +43,10 @@ exports.create = async (data) => {
         const duplicateEmailErr = await checkDuplicateEmail(email);
 
         if (duplicateEmailErr) return duplicateEmailErr;
+
+        if (!email.match(regex.EMAIL)) return { code: 400, message: 'Invalid Email! Email must be in the form abc@domain.com' };
+        
+        if (typeof age !== "number") return { code: 400, message: 'Age must be a number!' }
 
         return false;
 

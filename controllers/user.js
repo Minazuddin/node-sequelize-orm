@@ -50,6 +50,7 @@ controller.login = async (req, res) => {
         if (sanitizeErr) return sendResponse(res, sanitizeErr.code, sanitizeErr.message);
         
         //2. Generate token
+        console.log('gen token for user', userId);
         const [tokenErr, token] = generateToken({ _id: userId });
         if (tokenErr) return sendResponse(res, tokenErr.code, tokenErr.message);
         
@@ -64,18 +65,34 @@ controller.update = async (req, res) => {
     try {
         const data = req.body;
         
-        const { id } = req.params;
+        const userId = req.decoded._id;
 
         if (data.email) {
             
-            const err = await checkDuplicateEmail(data.email, id);
+            const err = await checkDuplicateEmail(data.email, userId);
 
             if (err) return sendResponse(res, 409, 'Email Already Exist!')  
         };
 
-        await Users.update(data, { where: { _id: id } });
+        await Users.update(data, { where: { _id: userId } });
         
         return sendResponse(res, 200, 'User Updated!');
+    
+    } catch (err) {
+        handleError(err, res);
+    }
+};
+
+controller.get = async (req, res) => {
+    try {
+        const user = await Users.findOne({
+            where: {
+                _id: req.decoded._id
+            },
+            attributes: ['_id', 'email', 'first_name', 'last_name', 'age']
+        });
+
+        return  sendResponse(res, 200, 'User Details!', user);
     
     } catch (err) {
         handleError(err, res);
@@ -97,10 +114,10 @@ controller.getAll = async (req, res) => {
 
 controller.delete = async (req, res) => {
     try {
-        const { id } = req.params;
+        const userId = req.decoded._id;
 
         const result = await Users.destroy({
-            where: { _id: id }
+            where: { _id: userId }
         });
 
         if (!result) return sendResponse(res, 404, 'Users Not Found!');
