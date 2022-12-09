@@ -8,7 +8,7 @@ controller.create = async (req, res) => {
     try {
         const vehicleData = req.body;
 
-        const { userId } = req.params;
+        const userId = req.decoded._id;
 
         const err = sanitize.create(vehicleData);
 
@@ -42,7 +42,7 @@ controller.update = async (req, res) => {
 
 controller.getAllVehiclesByUser = async (req, res) => {
     try {
-        const { userId } = req.params;
+        const userId = req.decoded._id;
 
         const user = await Users.findOne({ where: { _id: userId } })
 

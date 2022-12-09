@@ -12,6 +12,7 @@ app.use('/user', require('./routes/user'));
 app.use('/vehicle', require('./routes/vehicle'));
 
 console.log('Connected to DB');
+
 app.listen(PORT, () => console.log(`Server listening to PORT ${PORT}`))
 
 // db.sequelize

@@ -84,7 +84,9 @@ controller.update = async (req, res) => {
 
 controller.getAll = async (req, res) => {
     try {
-        const users = await Users.findAll();
+        const users = await Users.findAll({
+            attributes: ['_id', 'email', 'first_name', 'last_name', 'age']
+        });
 
         return  sendResponse(res, 200, 'User List!', users);
     
