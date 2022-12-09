@@ -10,7 +10,7 @@ controller.create = async (req, res) => {
         const data = req.body;
 
         // 1. Sanitize inputs
-        const err = await sanitize.createPayload(data);
+        const err = await sanitize.createUserPayload(data);
         if (err) return res.status(err.code).json({ status: false, message: err.message });
 
         // 2. Create user
