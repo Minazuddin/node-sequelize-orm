@@ -1,5 +1,5 @@
 const { Users, Vehicles } = require('../models');
-const { handleError, sendResponse, checkDuplicateEmail, hashPassword, generateToken } = require('../utils/helper');
+const { handleError, sendResponse, checkDuplicateEmail, generateToken } = require('../utils/helper');
 const sanitize = require('../sanitize/user');
 
 Users.hasMany(Vehicles);

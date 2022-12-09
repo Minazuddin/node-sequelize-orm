@@ -15,16 +15,6 @@ exports.generateToken = (payload) => {
     }
 };
 
-exports.hashPassword = (password) => {
-    try {
-        const hash = bcrypt.hashSync(password, 10);
-        return [null, hash];
-    } catch (err) {
-        console.error(err);
-        return ['Internal Server Error!', null];
-    }
-};
-
 exports.comparePassword = (password, encPassword) => bcrypt.compareSync(password, encPassword);
 
 exports.handleError = (err, res) => {
