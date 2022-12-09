@@ -1,4 +1,4 @@
-const { hashPassword } = require("../utils/helper");
+const bcrypt = require('bcrypt');
 
 module.exports = (sequelize, DataTypes) => {
     const User = sequelize.define('Users', {
@@ -20,6 +20,18 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             validate: {
                 notEmpty: true
+            },
+            set(password) {
+                try {
+                    const hash = bcrypt.hashSync(password, 10);
+                    this.setDataValue('password', hash);
+                    console.log('hash', {
+                        hash,
+                        password: this.getDataValue('password')
+                    })
+                } catch (err) {
+                    console.error(err);
+                }
             }
         },
         first_name: {
@@ -27,6 +39,9 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             validate: {
                 notEmpty: true
+            },
+            get() {
+                return this.getDataValue('first_name').toUpperCase();
             }
         },
         last_name: {
@@ -34,6 +49,9 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             validate: {
                 notEmpty: true
+            },
+            get() {
+                return this.getDataValue('last_name').toUpperCase();
             }
         },
         age: {

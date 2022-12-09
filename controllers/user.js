@@ -14,14 +14,10 @@ controller.signup = async (req, res) => {
         const sanitizeErr = await sanitize.create(data);
         if (sanitizeErr) return sendResponse(res, sanitizeErr.code, sanitizeErr.message);
 
-        // 2. Hash password
-        const [hashErr, hash] = hashPassword(data.password);
-        if (hashErr) return sendResponse(res, hashErr.code, hashErr.message);
-
-        // 3. Create user
+        // 2. Create user
         const userData = {
             email: data.email,
-            password: hash,
+            password: data.password,
             first_name: data.first_name,
             last_name: data.last_name,
             age: data.age,
@@ -44,18 +40,19 @@ controller.signup = async (req, res) => {
 
 controller.login = async (req, res) => {
     try {
-        //1. Sanitize inputs
         const data = req.body;
+        
+        //1. Sanitize inputs
         const [sanitizeErr, userId] = await sanitize.login(data);
         if (sanitizeErr) return sendResponse(res, sanitizeErr.code, sanitizeErr.message);
         
         //2. Generate token
-        console.log('gen token for user', userId);
         const [tokenErr, token] = generateToken({ _id: userId });
         if (tokenErr) return sendResponse(res, tokenErr.code, tokenErr.message);
         
         //3. Return response
         return sendResponse(res, 200, 'Logged in!', { token });
+        
     } catch (err) {
         handleError(err, res);
     }
@@ -101,6 +98,7 @@ controller.get = async (req, res) => {
 
 controller.getAll = async (req, res) => {
     try {
+
         const users = await Users.findAll({
             attributes: ['_id', 'email', 'first_name', 'last_name', 'age']
         });
