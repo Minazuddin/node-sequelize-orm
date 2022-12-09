@@ -1,5 +1,31 @@
 const { Op } = require('sequelize');
 const { Users } = require('../models');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+
+exports.generateToken = (payload) => {
+    try {
+        const token = jwt.sign(payload, process.env.JWT_SECRET || 'secret', {
+            expiresIn: '1d'
+        });
+        return [null, token];
+    } catch (err) {
+        console.error(err);
+        return ['Internal Server Error!', null]
+    }
+};
+
+exports.hashPassword = (password) => {
+    try {
+        const hash = bcrypt.hashSync(password, 10);
+        return [null, hash];
+    } catch (err) {
+        console.error(err);
+        return ['Internal Server Error!', null];
+    }
+};
+
+exports.comparePassword = (password, encPassword) => bcrypt.compareSync(password, encPassword);
 
 exports.handleError = (err, res) => {
     console.error(err);
@@ -18,7 +44,7 @@ exports.sendResponse = (res, code, message, data) => {
     };
 
     if (code === 200 || code === 201) {
-        resPayload.status = false;
+        resPayload.status = true;
     }
 
     res.status(code).json(resPayload);
@@ -39,64 +65,11 @@ exports.checkDuplicateEmail = async (email, id) => {
         where: query,
         attributes: ['_id']
     });
-    
+
     if (user) {
         return {
             code: 409,
             message: 'User with same email already exist!'
         };
     }
-};
-
-exports.sanitize = {
-    createUserPayload: async (data) => {
-        try {
-            const {
-                email,
-                first_name,
-                last_name,
-                age,
-            } = data;
-            // Assertions
-            if (!email) {
-                return {
-                    code: 400,
-                    message: 'User email is required!'
-                };
-            } else if (!first_name) {
-                return {
-                    code: 400,
-                    message: 'User first_name is required!'
-                };
-            } else if (!last_name) {
-                return {
-                    code: 400,
-                    message: 'User last_name is required!'
-                };
-            } else if (!age) {
-                return {
-                    code: 400,
-                    message: 'User age is required!'
-                };
-            }
-
-            const duplicateEmailErr = await this.checkDuplicateEmail(email);
-
-            if (duplicateEmailErr) return duplicateEmailErr;
-
-            return false;
-        } catch (err) {
-            console.error(err);
-
-            return {
-                code: 500,
-                message: 'Internal Server Error!'
-            };
-        }
-    },
-    createVehiclePayload: (data) => {
-        if (!data.brand) return { code: 400, message: 'Vehicle Brand is Required!' }
-        if (!data.model) return { code: 400, message: 'Vehicle Model is Required!' }
-        return false;
-    },
 };

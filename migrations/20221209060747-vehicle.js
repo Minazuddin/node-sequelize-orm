@@ -9,6 +9,7 @@ module.exports = {
      * Example:
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
+
     return await queryInterface.createTable('Vehicles', {
       _id: {
         type: Sequelize.UUID,
@@ -16,14 +17,14 @@ module.exports = {
         primaryKey: true,
       },
       brand: {
-        type: Sequelize.UUID,
+        type: Sequelize.STRING,
         allowNull: false,
         validate: {
           notEmpty: true,
         }
       },
       model: {
-        type: Sequelize.UUID,
+        type: Sequelize.STRING,
         allowNull: false,
         validate: {
           notEmpty: true

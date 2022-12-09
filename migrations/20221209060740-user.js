@@ -16,6 +16,21 @@ module.exports = {
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
       },
+      email: {
+        type: Sequelize.STRING,
+        unique: true,
+        allowNull: false,
+        validate: {
+          notEmpty: true
+        }
+      },
+      password: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: true
+        }
+      },
       first_name: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -29,17 +44,6 @@ module.exports = {
         validate: {
           notEmpty: true
         }
-      },
-      email: {
-        type: Sequelize.STRING,
-        unique: true,
-        allowNull: false,
-        validate: {
-          notEmpty: true
-        }
-      },
-      address: {
-        type: Sequelize.STRING,
       },
       age: {
         type: Sequelize.INTEGER,

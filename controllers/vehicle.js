@@ -1,5 +1,6 @@
 const { Users, Vehicles } = require('../models');
-const { handleError, sendResponse, sanitize } = require('../utils/helper');
+const { handleError, sendResponse } = require('../utils/helper');
+const sanitize = require('../sanitize/vehicle');
 
 const controller = {};
 
@@ -9,7 +10,7 @@ controller.create = async (req, res) => {
 
         const { userId } = req.params;
 
-        const err = sanitize.createVehiclePayload(vehicleData);
+        const err = sanitize.create(vehicleData);
 
         if (err) return sendResponse(res, err.code, err.message);
 
