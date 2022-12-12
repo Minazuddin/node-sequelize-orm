@@ -1,5 +1,7 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
+const morgan = require('morgan');
 const { generateToken } = require('./utils/middleware');
 const app = express();
 // const db = require('./models');
@@ -7,6 +9,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+
+app.use(morgan('tiny'))
+
+app.use(cors({
+    origin: ['http://localhost:3001', 'http://localhost:3000']
+}))
 
 app.use('/user', require('./routes/user'));
 app.use('/vehicle', require('./routes/vehicle'));

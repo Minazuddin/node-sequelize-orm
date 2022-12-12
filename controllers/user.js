@@ -71,9 +71,13 @@ controller.update = async (req, res) => {
             if (err) return sendResponse(res, 409, 'Email Already Exist!')  
         };
 
+        const user = await Users.findByPk(userId);
+
+        if (!user) return sendResponse(res, 404, 'User Not Found!');
+
         await Users.update(data, { where: { _id: userId } });
         
-        return sendResponse(res, 200, 'User Updated!');
+        return sendResponse(res, 200, 'User Updated!', user);
     
     } catch (err) {
         handleError(err, res);

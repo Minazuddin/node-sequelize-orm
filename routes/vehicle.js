@@ -11,6 +11,8 @@ router.post('/', Middleware.authenticate, VehicleController.create);
 
 router.patch('/:id', Middleware.authenticate, VehicleController.update);
 
+router.get('/:id', Middleware.authenticate, VehicleController.getVehicleById);
+
 router.delete('/:id', Middleware.authenticate, VehicleController.delete);
 
 module.exports = router;

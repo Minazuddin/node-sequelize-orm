@@ -5,11 +5,13 @@ const regex = require('../utils/regex');
 exports.create = async (data) => {
     try {
         const {
+            
             email,
             password,
             first_name,
             last_name,
             age,
+
         } = data;
 
         // Assertions
@@ -73,11 +75,11 @@ exports.login = async (data) => {
                 email: data.email
             }
         });
-        if (!user) return [{ code: 401, message: 'Incorrect Email!' }, null]
+        if (!user) return [{ code: 401, message: 'Invalid Credentials!' }, null]
 
         //3. Validation (Password)
         const isMatch = comparePassword(data.password, user.password);
-        if (!isMatch) return [{ code: 401, message: 'Incorrect Password!' }, null]
+        if (!isMatch) return [{ code: 401, message: 'Invalid Credentials!' }, null]
 
         return [null, user._id];
 

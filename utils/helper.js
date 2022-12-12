@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Users } = require('../models');
+const { Users, Vehicles } = require('../models');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
@@ -16,6 +16,15 @@ exports.generateToken = (payload) => {
 };
 
 exports.comparePassword = (password, encPassword) => bcrypt.compareSync(password, encPassword);
+
+exports.hashPassword = (password) => {
+    try {
+        return bcrypt.hashSync(password, process.env.HASH_SALT || 10)
+    } catch (err) {
+        console.error(err);
+        return null;
+    }
+}
 
 exports.handleError = (err, res) => {
     console.error(err);
@@ -62,4 +71,28 @@ exports.checkDuplicateEmail = async (email, id) => {
             message: 'User with same email already exist!'
         };
     }
+
+    return false;
 };
+
+exports.checkDuplicatePlateNumber = async (plate_number) => {
+    try {
+        const vehicle = await Vehicles.findOne({
+            where: {
+                plate_number
+            }
+        });
+    
+        if (vehicle) {
+            return {
+                code: 409,
+                message: 'Vehicle with same plate_number already exist!'
+            };
+        }
+    
+        return false;
+    } catch (err) {
+        console.error(err);
+    }
+};
+

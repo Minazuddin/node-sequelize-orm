@@ -19,6 +19,27 @@ module.exports = (sequelize, DataTypes) => {
             validate: {
                 notEmpty: true
             }
+        },
+        plate_number: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: true
+            }
+        },
+        createdAt: {
+            type: DataTypes.DATE,
+            allowNull: false,
+            validate: {
+                notEmpty: true
+            }
+        },
+        updatedAt: {
+            type: DataTypes.DATE,
+            allowNull: false,
+            validate: {
+                notEmpty: true
+            }
         }
     });
     return Vehicle;

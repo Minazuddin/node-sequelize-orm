@@ -22,13 +22,10 @@ module.exports = (sequelize, DataTypes) => {
                 notEmpty: true
             },
             set(password) {
+                console.log({ bcrypt })
                 try {
                     const hash = bcrypt.hashSync(password, 10);
-                    this.setDataValue('password', hash);
-                    console.log('hash', {
-                        hash,
-                        password: this.getDataValue('password')
-                    })
+                    if (hash) this.setDataValue('password', hash);
                 } catch (err) {
                     console.error(err);
                 }
@@ -56,6 +53,20 @@ module.exports = (sequelize, DataTypes) => {
         },
         age: {
             type: DataTypes.INTEGER,
+            allowNull: false,
+            validate: {
+                notEmpty: true
+            }
+        },
+        createdAt: {
+            type: DataTypes.DATE,
+            allowNull: false,
+            validate: {
+                notEmpty: true
+            }
+        },
+        updatedAt: {
+            type: DataTypes.DATE,
             allowNull: false,
             validate: {
                 notEmpty: true
