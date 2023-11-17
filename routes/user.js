@@ -7,13 +7,11 @@ router.post('/signup', UserController.signup);
 
 router.post('/login', UserController.login);
 
-router.get('/', Middleware.authenticate, UserController.get);
+router.get('/', Middleware.Authorize, UserController.get);
 
-router.get('/getAll', Middleware.authenticate, UserController.getAll);
+router.patch('/', Middleware.Authorize, UserController.update);
 
-router.patch('/', Middleware.authenticate, UserController.update);
-
-router.delete('/', Middleware.authenticate, UserController.delete);
+router.delete('/', Middleware.Authorize, UserController.delete);
 
 module.exports = router;
 

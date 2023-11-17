@@ -1,5 +1,5 @@
-const { Users, Vehicles } = require('../models');
-const { handleError, sendResponse, checkDuplicateEmail, generateToken } = require('../utils/helper');
+const { Users, Vehicles, sequelize } = require('../models');
+const { handleError, sendResponse, checkDuplicateEmail, generateToken, signJwt } = require('../utils/helper');
 const sanitize = require('../sanitize/user');
 
 Users.hasMany(Vehicles);
@@ -41,18 +41,18 @@ controller.signup = async (req, res) => {
 controller.login = async (req, res) => {
     try {
         const data = req.body;
-        
+
         //1. Sanitize inputs
         const [sanitizeErr, userId] = await sanitize.login(data);
         if (sanitizeErr) return sendResponse(res, sanitizeErr.code, sanitizeErr.message);
-        
+
         //2. Generate token
-        const [tokenErr, token] = generateToken({ _id: userId });
+        const [tokenErr, token] = await signJwt({ _id: userId });
         if (tokenErr) return sendResponse(res, tokenErr.code, tokenErr.message);
-        
+
         //3. Return response
         return sendResponse(res, 200, 'Logged in!', { token });
-        
+
     } catch (err) {
         handleError(err, res);
     }
@@ -61,24 +61,24 @@ controller.login = async (req, res) => {
 controller.update = async (req, res) => {
     try {
         const data = req.body;
-        
+
         const userId = req.decoded._id;
 
         if (data.email) {
-            
+
             const err = await checkDuplicateEmail(data.email, userId);
 
-            if (err) return sendResponse(res, 409, 'Email Already Exist!')  
+            if (err) return sendResponse(res, 409, 'Email Already Exist!')
         };
 
-        const user = await Users.findByPk(userId);
+        const user = await Users.findByPk(userId, { transaction });
 
         if (!user) return sendResponse(res, 404, 'User Not Found!');
 
-        await Users.update(data, { where: { _id: userId } });
-        
+        await Users.update(data, { where: { _id: userId } }, { transaction });
+
         return sendResponse(res, 200, 'User Updated!', user);
-    
+
     } catch (err) {
         handleError(err, res);
     }
@@ -90,25 +90,11 @@ controller.get = async (req, res) => {
             where: {
                 _id: req.decoded._id
             },
-            attributes: ['_id', 'email', 'first_name', 'last_name', 'age']
+            attributes: ['_id', 'email', 'first_name', 'last_name', 'age', 'vehicle_count']
         });
 
-        return  sendResponse(res, 200, 'User Details!', user);
-    
-    } catch (err) {
-        handleError(err, res);
-    }
-};
+        return sendResponse(res, 200, 'User Details!', user);
 
-controller.getAll = async (req, res) => {
-    try {
-
-        const users = await Users.findAll({
-            attributes: ['_id', 'email', 'first_name', 'last_name', 'age']
-        });
-
-        return  sendResponse(res, 200, 'User List!', users);
-    
     } catch (err) {
         handleError(err, res);
     }

@@ -1,10 +1,12 @@
-const { Users, Vehicles } = require('../models');
+const { Users, Vehicles, sequelize } = require('../models');
 const { handleError, sendResponse, checkDuplicatePlateNumber } = require('../utils/helper');
 const sanitize = require('../sanitize/vehicle');
 
 const controller = {};
 
 controller.create = async (req, res) => {
+    let t;
+
     try {
         const vehicleData = req.body;
 
@@ -16,11 +18,22 @@ controller.create = async (req, res) => {
 
         const user = await Users.findOne({ where: { _id: userId } });
 
-        const vehicle = await user.createVehicle(vehicleData);
+        if (!user) return sendResponse(res, 404, 'User Not Found!');
 
-        return sendResponse(res, 201, 'Vehicle Added!', vehicle);
+        t = await sequelize.transaction();
+
+        const vehicle = await user.createVehicle(vehicleData, { transaction: t });
+
+        await user.increment('vehicle_count', { by: 1 }, { transaction: t });
+
+        t.afterCommit(() => sendResponse(res, 201, 'Vehicle Added!', vehicle));
+
+        await t.commit();
 
     } catch (err) {
+
+        await t.rollback();
+
         handleError(err, res);
     }
 };
@@ -78,16 +91,29 @@ controller.getAllVehiclesByUser = async (req, res) => {
 };
 
 controller.delete = async (req, res) => {
+    let t;
+
     try {
         const { id } = req.params;
 
-        const result = await Vehicles.destroy({ where: { _id: id } })
-        
+        t = await sequelize.transaction();
+
+        const user = await Users.findByPk(req.decoded._id, { transaction: t });
+
+        if (!user) return sendResponse(res, 404, 'User Not Found!');
+
+        const result = await Vehicles.destroy({ where: { _id: id } }, { transaction: t })
+
         if (!result) return sendResponse(res, 404, 'Vehicle Not Found!');
 
-        return sendResponse(res, 200, 'Vehicle Deleted!');
-    
+        if (user.vehicle_count > 0) await user.decrement('vehicle_count', { by: 1 }, { transaction: t });
+
+        t.afterCommit(() => sendResponse(res, 200, 'Vehicle Deleted!'))
+
+        await t.commit();
+
     } catch (err) {
+        t.rollback();
         handleError(err, res);
     }
 };

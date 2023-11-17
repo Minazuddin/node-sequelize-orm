@@ -5,14 +5,14 @@ const VehicleController = require('../controllers/vehicle');
 
 const router = express.Router();
 
-router.get('/getAll', Middleware.authenticate, VehicleController.getAllVehiclesByUser);
+router.get('/getAll', Middleware.Authorize, VehicleController.getAllVehiclesByUser);
 
-router.post('/', Middleware.authenticate, VehicleController.create);
+router.post('/', Middleware.Authorize, VehicleController.create);
 
-router.patch('/:id', Middleware.authenticate, VehicleController.update);
+router.patch('/:id', Middleware.Authorize, VehicleController.update);
 
-router.get('/:id', Middleware.authenticate, VehicleController.getVehicleById);
+router.get('/:id', Middleware.Authorize, VehicleController.getVehicleById);
 
-router.delete('/:id', Middleware.authenticate, VehicleController.delete);
+router.delete('/:id', Middleware.Authorize, VehicleController.delete);
 
 module.exports = router;

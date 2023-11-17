@@ -22,7 +22,6 @@ module.exports = (sequelize, DataTypes) => {
                 notEmpty: true
             },
             set(password) {
-                console.log({ bcrypt })
                 try {
                     const hash = bcrypt.hashSync(password, 10);
                     if (hash) this.setDataValue('password', hash);
@@ -57,6 +56,10 @@ module.exports = (sequelize, DataTypes) => {
             validate: {
                 notEmpty: true
             }
+        },
+        vehicle_count: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0
         },
         createdAt: {
             type: DataTypes.DATE,

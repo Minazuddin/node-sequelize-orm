@@ -1,10 +1,14 @@
 require('dotenv').config();
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
-const { generateToken } = require('./utils/middleware');
+const { generateJwkSet } = require('./utils/helper');
 const app = express();
 // const db = require('./models');
+const jwksRoutes = require('./routes/jwks');
+const userRoutes = require('./routes/user');
+const vehicleRoutes = require('./routes/vehicle');
 
 const PORT = process.env.PORT || 3000;
 
@@ -16,12 +20,18 @@ app.use(cors({
     origin: ['http://localhost:3001', 'http://localhost:3000']
 }))
 
-app.use('/user', require('./routes/user'));
-app.use('/vehicle', require('./routes/vehicle'));
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/jwks', jwksRoutes);
+app.use('/user', userRoutes);
+app.use('/vehicle', vehicleRoutes);
 
 console.log('Connected to DB');
 
-app.listen(PORT, () => console.log(`Server listening to PORT ${PORT}`))
+app.listen(PORT, () => {
+    generateJwkSet();
+    console.log(`Server listening to PORT ${PORT}`)
+})
 
 // db.sequelize
 //     .sync()

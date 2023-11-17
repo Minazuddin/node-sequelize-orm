@@ -5,10 +5,12 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "migration:create": "npx sequelize-cli migration:create",
+    "migration:create:user": "npx sequelize-cli migration:create --name user",
+    "migration:create:vehicle": "npx sequelize-cli migration:create --name vehicle",
     "migrate": "npx sequelize-cli db:migrate",
+    "db:create": "npx sequelize-cli db:create",
     "undo": "npx sequelize-cli db:migrate:undo:all",
-    "start": "npm run migrate && nodemon server.js"
+    "start": "npm run db:create && npm run migrate && nodemon server.js"
   },
   "keywords": [],
   "author": "",
@@ -19,8 +21,12 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "jsonwebtoken": "^8.5.1",
+    "jwk-to-pem": "^2.0.5",
     "morgan": "^1.10.0",
     "mysql2": "^2.3.3",
+    "node-jose": "^2.1.1",
+    "pg": "^8.8.0",
+    "pg-hstore": "^2.3.4",
     "sequelize": "^6.26.0",
     "sequelize-cli": "^6.5.2"
   },
